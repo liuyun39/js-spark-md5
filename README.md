@@ -56,42 +56,43 @@ var rawHash = spark.end(true);                  // OR raw hash (binary string)
 NOTE: If you test the code bellow using the file:// protocol in chrome you must start the browser with -allow-file-access-from-files argument.
       Please see: http://code.google.com/p/chromium/issues/detail?id=60889
 
+js-spark-md5 for Vue3
 ```js
-document.getElementById('file').addEventListener('change', function () {
-    var blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
-        file = this.files[0],
-        chunkSize = 2097152,                             // Read in chunks of 2MB
-        chunks = Math.ceil(file.size / chunkSize),
-        currentChunk = 0,
-        spark = new SparkMD5.ArrayBuffer(),
-        fileReader = new FileReader();
+function getHashOfMD5 (file: any) { // file = file.raw
+  return new Promise((resolve, reject) => {
+    const blobSlice = File.prototype.slice ?? File.prototype.mozSlice ?? File.prototype.webkitSlice
+    const chunkSize = 2097152
+    const chunks = Math.ceil(file.size / chunkSize)
+    let currentChunk = 0
+    const spark = new SparkMD5.ArrayBuffer()
+    const fileReader = new FileReader()
 
     fileReader.onload = function (e) {
-        console.log('read chunk nr', currentChunk + 1, 'of', chunks);
-        spark.append(e.target.result);                   // Append array buffer
-        currentChunk++;
-
-        if (currentChunk < chunks) {
-            loadNext();
-        } else {
-            console.log('finished loading');
-            console.info('computed hash', spark.end());  // Compute hash
-        }
-    };
-
-    fileReader.onerror = function () {
-        console.warn('oops, something went wrong.');
-    };
-
-    function loadNext() {
-        var start = currentChunk * chunkSize,
-            end = ((start + chunkSize) >= file.size) ? file.size : start + chunkSize;
-
-        fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
+      console.log('read chunk nr', currentChunk + 1, 'of', chunks)
+      spark.append(e.target.result)  // Append array buffer
+      currentChunk++
+      if (currentChunk < chunks) {
+        loadNext()
+      } else {
+        console.log('finished loading')
+        console.info('computed hash', spark.end())  // Compute hash
+        resolve(spark.end())
+      }
     }
 
-    loadNext();
-});
+    fileReader.onerror = function () {
+      console.warn('oops, something went wrong.')
+      reject(new Error('哈希运算失败'))
+    }
+
+    function loadNext() {
+      const start = currentChunk * chunkSize,
+      const end = ((start + chunkSize) >= file.size) ? file.size : start + chunkSize
+      fileReader.readAsArrayBuffer(blobSlice.call(file, start, end))
+    }
+    loadNext()
+  })
+}
 ```
 
 You can see some more examples in the test folder.
