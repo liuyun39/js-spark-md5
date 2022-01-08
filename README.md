@@ -75,6 +75,7 @@ function getHashOfMD5 (file: any) { // file = file.raw
         loadNext()
       } else {
         console.log('finished loading')
+        // Note: it can only be called once
         const MD5Hash = spark.end()
         resolve(spark.MD5Hash)
       }
@@ -82,7 +83,7 @@ function getHashOfMD5 (file: any) { // file = file.raw
 
     fileReader.onerror = function () {
       console.warn('oops, something went wrong.')
-      reject(new Error('哈希运算失败'))
+      reject(new Error('Failed to get MD5 value'))
     }
 
     function loadNext() {
