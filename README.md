@@ -75,8 +75,8 @@ function getHashOfMD5 (file: any) { // file = file.raw
         loadNext()
       } else {
         console.log('finished loading')
-        console.info('computed hash', spark.end())  // Compute hash
-        resolve(spark.end())
+        const MD5Hash = spark.end()
+        resolve(spark.MD5Hash)
       }
     }
 
